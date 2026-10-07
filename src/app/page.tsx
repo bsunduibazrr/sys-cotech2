@@ -1,69 +1,194 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+type Unit = "Celseus" | "Fahrenheit" | "Kelvin" | "";
+export default function TemperatureConverter() {
+  const [temperature, setTemperature] = useState<string>("");
+  const [fromUnit, setFromUnit] = useState<Unit>("");
+  const [toUnit, setToUnit] = useState<Unit>("");
+  const [result, setResult] = useState<string | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<"from" | "to" | null>(null);
+  const isFormValid =
+    temperature.trim() !== "" && fromUnit !== "" && toUnit !== "";
+  const convertTemperature = (val: number, from: Unit, to: Unit): number => {
+    if (from === to) return val;
+    let Celseus: number;
 
-export default function Home() {
+    if (from === "Celseus") {
+      Celseus = val;
+    } else if (from === "Fahrenheit") {
+      Celseus = ((val - 32) * 5) / 9;
+    } else {
+      Celseus = val - 273.15;
+    }
+    if (to === "Celseus") {
+      return Celseus;
+    } else if (to === "Fahrenheit") {
+      return (Celseus * 9) / 5 + 32;
+    } else {
+      return Celseus + 273.15;
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid) return;
+    const numericVal = parseFloat(temperature);
+    if (isNaN(numericVal)) {
+      setResult("Please enter a valid number.");
+      return;
+    }
+    const converted = convertTemperature(numericVal, fromUnit, toUnit);
+    const formattedResult = Number.isInteger(converted)
+      ? converted.toString()
+      : converted.toFixed(1);
+
+    setResult(`${temperature} ${fromUnit} is ${formattedResult} ${toUnit}`);
+  };
+  const selectFromUnit = (unit: Unit) => {
+    setFromUnit(unit);
+    setOpenDropdown(null);
+    setResult(null);
+  };
+  const selectToUnit = (unit: Unit) => {
+    setToUnit(unit);
+    setOpenDropdown(null);
+    setResult(null);
+  };
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <main
+      className="min-h-screen bg-white flex justify-center items-center px-6 py-10"
+      onClick={() => setOpenDropdown(null)}
+    >
+      <section
+        className="w-full max-w-[1320px] rounded-[22px] border-[3px] border-[#292929] bg-white px-8 py-12 sm:px-16"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h1 className="text-[42px] font-normal leading-tight tracking-[-1px] text-[#242424]">
+          Temperature Converter
+        </h1>
+        <p className="mt-4 text-[25px] leading-none text-[#292929]">
+          Enter the temperature, select units and submit
+        </p>
+        <form onSubmit={handleSubmit} className="mt-12">
+          <div className="flex flex-wrap items-start gap-5">
+            <input
+              type="number"
+              step="any"
+              placeholder="0.00"
+              value={temperature}
+              onChange={(e) => {
+                setTemperature(e.target.value);
+                setResult(null);
+              }}
+              className="h-[65px] w-[120px] rounded-[18px] border-[3px] border-[#292929] bg-white px-5 text-center text-[28px] text-[#222] outline-none placeholder:text-[#222] focus:ring-0"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <div className="relative w-[200px]">
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenDropdown(openDropdown === "from" ? null : "from")
+                }
+                className="flex h-[65px] w-full items-center justify-between rounded-[18px] border-[3px] border-[#292929] bg-white px-6 text-[26px] text-[#222] outline-none"
+              >
+                <span>{fromUnit || "From Unit"}</span>
+                <span
+                  className={`text-[20px] transition-transform ${
+                    openDropdown === "from" ? "rotate-180" : ""
+                  }`}
+                >
+                  ˅
+                </span>
+              </button>
+              {openDropdown === "from" && (
+                <div className="absolute left-0 top-[73px] z-50 w-full overflow-hidden rounded-[18px] border-[3px] border-[#292929] bg-white shadow-lg">
+                  <button
+                    type="button"
+                    onClick={() => selectFromUnit("Fahrenheit")}
+                    className="block w-full px-6 py-4 text-left text-[25px] text-[#222] transition-colors hover:bg-gray-100"
+                  >
+                    Fahrenheit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => selectFromUnit("Celseus")}
+                    className="block w-full px-6 py-4 text-left text-[25px] text-[#222] transition-colors hover:bg-gray-100"
+                  >
+                    Celseus
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => selectFromUnit("Kelvin")}
+                    className="block w-full px-6 py-4 text-left text-[25px] text-[#222] transition-colors hover:bg-gray-100"
+                  >
+                    Kelvin
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="relative w-[200px]">
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenDropdown(openDropdown === "to" ? null : "to")
+                }
+                className="flex h-[65px] w-full items-center justify-between rounded-[18px] border-[3px] border-[#292929] bg-white px-6 text-[26px] text-[#222] outline-none"
+              >
+                <span>{toUnit || "To Unit"}</span>
+                <span
+                  className={`text-[20px] transition-transform ${
+                    openDropdown === "to" ? "rotate-180" : ""
+                  }`}
+                >
+                  ˅
+                </span>
+              </button>
+              {openDropdown === "to" && (
+                <div className="absolute left-0 top-[73px] z-50 w-full overflow-hidden rounded-[18px] border-[3px] border-[#292929] bg-white shadow-lg">
+                  <button
+                    type="button"
+                    onClick={() => selectToUnit("Fahrenheit")}
+                    className="block w-full px-6 py-4 text-left text-[25px] text-[#222] transition-colors hover:bg-gray-100"
+                  >
+                    Fahrenheit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => selectToUnit("Celseus")}
+                    className="block w-full px-6 py-4 text-left text-[25px] text-[#222] transition-colors hover:bg-gray-100"
+                  >
+                    Celseus
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => selectToUnit("Kelvin")}
+                    className="block w-full px-6 py-4 text-left text-[25px] text-[#222] transition-colors hover:bg-gray-100"
+                  >
+                    Kelvin
+                  </button>
+                </div>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={!isFormValid}
+              className={`h-[65px] w-[200px] rounded-[18px] bg-black text-[28px] text-white transition-all ${
+                isFormValid
+                  ? "cursor-pointer hover:bg-[#222]"
+                  : "cursor-not-allowed opacity-40"
+              }`}
+            >
+              Convert
+            </button>
+          </div>
+          {result && (
+            <section className="mt-8 rounded-[22px] bg-white">
+              <p className="mt-10 text-[27px] font-normal text-[#2fa24f]">
+                {result}
+              </p>
+            </section>
+          )}
+        </form>
+      </section>
+    </main>
   );
 }
